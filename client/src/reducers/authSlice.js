@@ -50,16 +50,20 @@ export const authSlice = createSlice({
       state.user = user;
     },
 
+
     setPlans: (state, action) => {
       const { plans } = action.payload;
       state.plans = plans;
+
+      // Save the updated state to localStorage
+      localStorage.setItem('plans', JSON.stringify(state));
     },
 
     logOut: (state, action) => {
       state.user = null;
       state.token = null;
       state.isLogged = false;
-      state.plans = null;
+
       localStorage.removeItem('token');
     },
   },

@@ -9,6 +9,7 @@ import NotFound from "./components/NotFound";
 import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Plans from "./pages/Plans";
 
 /*
 
@@ -26,6 +27,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/myPlans" element={<Plans />} />
         </Routes>
       </Router>
     </ChakraProvider>

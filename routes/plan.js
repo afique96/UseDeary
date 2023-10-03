@@ -10,7 +10,7 @@ const openai = new OpenAIApi(configuration);
 
 
 
-// Create the "user" table if it doesn't exist (usually done during app setup)
+// Create the "plan" table if it doesn't exist (usually done during app setup)
 router.post('/createTable', async (req, res) => {
     try {
   
@@ -65,6 +65,7 @@ router.post('/create', async (req, res) => {
         const response = await openai.createChatCompletion({
             model: "gpt-3.5-turbo",
             messages: messages,
+            temperature: 0.1
         })
 
         console.log(messages);
@@ -87,16 +88,44 @@ router.post('/create', async (req, res) => {
     }
 });
 
-// Create the "user" table if it doesn't exist (usually done during app setup)
-router.post('/createTable', async (req, res) => {
+router.post('/submitPlan', async (req, res) => {
     try {
+      const { user_id, days, subject, calendar_schedule, paid_suggestions } = req.body;
+
   
+      // Insert the plan data into the database
+      const insertPlanQuery = `
+        INSERT INTO plan (user_id, days, subject, calendar_schedule, paid_suggestions)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING *
+      `;
   
-      const { rows } = await pool.query();
+      const values = [user_id, days, subject, calendar_schedule, paid_suggestions];
+      const { rows } = await pool.query(insertPlanQuery, values);
   
-      res.status(200).json({ message: 'Plan table created successfully.' });
+      res.status(201).json({ message: 'Plan submitted successfully', });
     } catch (error) {
-      console.error('Error creating plan table:', error);
+      console.error('Error submitting plan:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  router.get('/getPlansByUserId/:userId', async (req, res) => {
+    try {
+      const userId = req.params.userId;
+
+  
+      // Query the database to retrieve all plans for the specified user ID
+      const getPlansQuery = `
+        SELECT * FROM plan
+        WHERE user_id = $1
+      `;
+  
+      const { rows } = await pool.query(getPlansQuery, [userId]);
+  
+      res.status(200).json({ plans: rows });
+    } catch (error) {
+      console.error('Error retrieving plans by user ID:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
   });

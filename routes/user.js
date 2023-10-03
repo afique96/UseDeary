@@ -66,6 +66,36 @@ router.post('/createTable', async (req, res) => {
     }
   });
 
+  router.post("/decreaseCredit/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Fetch the user's current credit from the database
+        const user = await pool.query(
+            'SELECT credit FROM "public"."user" WHERE user_id = $1',
+            [id]
+        );
+
+        const currentCredit = user.rows[0].credit;
+
+        // Check if the user has enough credit to decrease by 1
+        if (currentCredit >= 1) {
+            // Decrease the user's credit by 1 in the database
+            await pool.query(
+                'UPDATE "public"."user" SET credit = credit - 1 WHERE user_id = $1',
+                [id]
+            );
+
+            res.json({ message: "Credit decreased by 1" });
+        } else {
+            res.status(403).json({ error: "Insufficient credit to decrease" });
+        }
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "An error occurred" });
+    }
+});
+
 
 
 

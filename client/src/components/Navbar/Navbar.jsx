@@ -199,6 +199,9 @@ export default function WithSubnavigation() {
                 <Link to="/profile">
                   <MenuItem>My Profile</MenuItem>
                 </Link>
+                <Link to="/myPlans">
+                  <MenuItem>My Plans</MenuItem>
+                </Link>
                 <MenuItem onClick={onOpenModal}></MenuItem>
                 <MenuItem>Settings</MenuItem>
                 <MenuItem

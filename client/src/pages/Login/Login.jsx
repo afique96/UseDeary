@@ -19,20 +19,28 @@ import {
   Center,
 } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
-import { setAuth, fetchUser, setUser } from "../../reducers/authSlice";
-import { useDispatch } from "react-redux";
+import {
+  setAuth,
+  fetchUser,
+  setUser,
+  getPlans,
+} from "../../reducers/authSlice";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import baseUrl from "../../data/baseUrl";
 import Footer from "../../components/Footer";
+import axios from "axios";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [isPending, setIsPending] = useState(false);
+
   const toast = useToast();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const plans = useSelector(getPlans);
 
   const handleLogin = async (event) => {
     setIsPending(true);
@@ -74,6 +82,22 @@ export default function Login() {
             user: user.payload,
           })
         );
+
+        // if user logedin and already had created a plan decrease credit by one
+        if (plans && plans.length > 0) {
+          try {
+            console.log(user);
+            const response = await axios.post(
+              `http://localhost:5000/user/decreaseCredit/${user.payload.user_id}`,
+              {}
+            );
+            console.log(response.data);
+            // Handle the response as needed
+          } catch (error) {
+            console.error(error);
+            // Handle errors if any
+          }
+        }
       } else {
         setIsPending(false);
         toast({

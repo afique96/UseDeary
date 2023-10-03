@@ -11,7 +11,7 @@ router.post('/register', validInfo, async (req, res) => {
         
 
         // Extract user data from the request body
-        const { username ,password, name ,surname ,email ,date_of_birth, account_status ,auth_token, sub_tier } = req.body;
+        const { username ,password, name ,surname ,email ,date_of_birth, account_status ,auth_token, sub_tier, credit } = req.body;
 
         // Enclose the email value in single quotes in the SQL query
         const user = await pool.query('SELECT * FROM "user" WHERE email = $1', [email]);
@@ -19,6 +19,8 @@ router.post('/register', validInfo, async (req, res) => {
         if (user.rows.length !== 0) {
         return res.status(401).json({ message: 'Email is already in use.'});
         }
+
+        console.log(req.body)
                     
 
         // hash the password
@@ -29,18 +31,18 @@ router.post('/register', validInfo, async (req, res) => {
 
         // Insert user data into the "user" table
         const insertUserQuery = `
-        INSERT INTO "user" (username ,password, name ,surname ,email ,date_of_birth, account_status ,auth_token, sub_tier )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9 )
-        RETURNING id, username, email
+        INSERT INTO "user" (username ,password, name ,surname ,email ,date_of_birth, account_status ,auth_token, sub_tier, credit )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10 )
+        RETURNING user_id, username, email
         `;
 
-        const values = [username, hashedPassword, name, surname, email, date_of_birth, account_status, auth_token, sub_tier];
+        const values = [username, hashedPassword, name, surname, email, date_of_birth, account_status, auth_token, sub_tier, credit];
         const { rows } = await pool.query(insertUserQuery, values);
 
 
         // generating web token
-        const token = generateJWT(newUser.rows[0].user_id);
-        const userId = newUser.rows[0].user_id;
+        const token = generateJWT(rows[0].user_id);
+        const userId = rows[0].user_id;
 
         res.json({ token, userId });
     } catch (error) {
@@ -66,13 +68,13 @@ router.post('/register', validInfo, async (req, res) => {
         return res.status(401).json("Password or email is incorrect.");
         }
 
-        /*
+        
         const validPassword = await bcrypt.compare(password, user.rows[0].password);
 
         if (!validPassword) {
         return res.status(401).json("Password or email is incorrect.");
         }
-        */
+        
 
         const token = generateJWT(user.rows[0].user_id);
         const userId = user.rows[0].user_id;
