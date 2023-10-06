@@ -7,6 +7,12 @@ const app = express();
 
 const port = process.env.PORT || 5000;
 
+// Middleware to set the X-Content-Type-Options header
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    next();
+  });
+
 app.use(cors());
 app.use(express.json());
 
